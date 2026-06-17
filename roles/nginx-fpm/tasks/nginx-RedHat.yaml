@@ -1,0 +1,26 @@
+---
+- name: Add official Nginx repository
+  yum_repository:
+    name: nginx-stable
+    description: Nginx Stable Repo
+    baseurl: "{{ nginx_repo_url }}"
+    gpgcheck: yes
+    enabled: yes
+    gpgkey: "{{ nginx_gpg_key }}"
+    module_hotfixes: yes
+
+- name: Install Nginx
+  dnf:
+    name: nginx
+    state: present
+  notify: restart nginx
+
+
+- name: Ensure LEMP services are started and enabled on boot
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  loop:
+    - nginx
+    - php-fpm

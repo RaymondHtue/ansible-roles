@@ -1,0 +1,29 @@
+---
+
+# For RPM based Instance in GoogleCloud, will need to install missing kernel module 
+# sudo dnf install kernel-modules-extra-$(uname -r)
+# This playbook install docker, node exporter and deploy nginx container with docker compose
+
+- name: Installing docker 
+  hosts: <host> # ssh passwordless authentication must be congiure in local maching or ansible execution host
+  remote_user: ansible 
+  become: true
+  gather_facts: true 
+  gather_subset:
+    - "!all"
+    - min     # Collect essential facts including OS information
+    - distribution 
+  # this vars will override or add the default values in docker roles.
+#  vars: -> moved to var file <-
+#    docker_users:
+#      - sysadmin
+#      - ansible
+  roles:
+    - role: common
+      tags: common
+    - role: docker 
+      tags: docker 
+    - role: nginx
+      tags: nginx
+    - role: nodeExporter
+      tags: nodeExporter

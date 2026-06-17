@@ -1,0 +1,17 @@
+- name: Check systemd status
+  remote_user: ansible
+  become: true
+  tasks:
+  - name: Check if firewalld service is active
+    ansible.builtin.command: systemctl is-active firewalld.service
+    register: is_firewalld_active.stdout
+#  - name: Populate service facts
+#    ansible.builtin.service_facts:
+#
+#  - name: Print service facts
+#    ansible.builtin.debug:
+#      msg: ansible_facts['services']['firewalld.service']['state']
+
+  - name: Print Firewalld State
+    ansible.builtin.debug:
+      msg: "{{ is_firewalld_active.stdout }}"

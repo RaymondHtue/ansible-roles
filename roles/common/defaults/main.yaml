@@ -1,0 +1,8 @@
+dev_users:
+  - name: devuser
+    ssh_key_file: "~/.keys/example-key.pub"
+
+packages:
+- acl
+- vim
+- git

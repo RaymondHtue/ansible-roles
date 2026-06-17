@@ -1,0 +1,1 @@
+docker_repo_base_url: https://download.docker.com/linux/rhel/9/{{ ansible_machine }}/stable/

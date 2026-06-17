@@ -1,0 +1,64 @@
+- name: Ensure old versions of Docker are not installed.
+  package:
+    name: "{{ docker_unofficial_packages }}"
+    state: absent
+
+- name: Install prerequisite packages for Docker
+  ansible.builtin.dnf:
+    name: "{{ docker_prerequisite_packages }}"
+    state: present
+    update_cache: yes
+
+- name: Import the Docker GPG key
+  ansible.builtin.rpm_key:
+    state: present 
+    key: "{{ docker_rpm_gpg_key }}"
+
+- name: Add docker ce repository
+  ansible.builtin.yum_repository:
+    name: docker-ce
+    description: Docker CE Repository
+    baseurl: "{{ docker_repo_base_url }}"
+    gpgcheck: yes
+    gpgkey: "{{ docker_rpm_gpg_key }}"
+    repo_gpgcheck: true
+    enabled: yes 
+
+- name: Install Docker Engine, CLI, Containerd, and Plugins
+  ansible.builtin.dnf:
+    name: "{{ docker_install_packages }}" 
+    state: present 
+
+#- name: Apply Docker daemon.json configuration (Log Rotation)
+#  ansible.builtin.copy:
+#    content: "{{ docker_daemon_config | to_nice_json }}"
+#    dest: /etc/docker/daemon.json
+#    owner: root
+#    group: root
+#    mode: '0644'
+#  notify: restart docker
+
+- name: daemon.json configuration (Log Rotation) 
+  ansible.builtin.template:
+    src: daemon.json.j2
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: '0644'
+#  notify: restart docker
+  
+- name: Enable & start docker
+  ansible.builtin.systemd:
+    state: started
+    enabled: true
+    name: docker
+
+- name: Verify Docker installation
+  command: docker --version
+  register: docker_version
+  changed_when: false
+
+- name: Display Docker version
+  debug:
+    msg: "Docker installed successfully: {{ docker_version.stdout }}"
+

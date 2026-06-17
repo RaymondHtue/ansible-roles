@@ -1,0 +1,29 @@
+---
+- name: Enable the php {{ php_ver }} module stream and install the default profile
+  ansible.builtin.dnf:
+    name: "@php:{{ php_ver }}"
+    state: present
+
+- name: Install PHP and required extensions
+  dnf:
+    name: "{{ php_packages_redhat }}"
+    state: present
+  notify: restart php-fpm - RedHat
+
+- name: Ensure LEMP services are started and enabled on boot
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  loop:
+    - nginx
+    - php-fpm
+
+
+- name: Create php-fpm pool for each virtual host
+  ansible.builtin.template:
+    src: fpm-pool-RedHat.conf.j2
+    dest: "/etc/php-fpm.d/{{ item.php_fpm_pool_name }}.conf"
+  notify: restart php-fpm - RedHat
+  loop: "{{ vhosts }}"
+  when: item.app == "php"

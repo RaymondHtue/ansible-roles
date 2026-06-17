@@ -1,0 +1,17 @@
+[defaults]
+inventory = inventory
+remote_user = ansible 
+fork = 5 # to use parallelism
+host_key_checking = False
+
+[privilege_escalation]
+become = true # change sudo or not
+become_method = sudo
+become_user = root
+become_ask_pass = False
+
+[ssh_connection]
+
+pipelining = True
+# to keep a single network connection open for multiple tasks.
+ssh_args = -o ControlMaster=auto -o ControlPersist=80s 

@@ -1,0 +1,11 @@
+---
+- name: get facts
+  become: false
+  tasks:
+  - name: get facts
+    debug:
+      msg: "{{ ansible_facts }}"
+
+  - name: get facts os arch
+    debug:
+      msg: "{{ ansible_machine }}"

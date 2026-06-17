@@ -1,0 +1,9 @@
+services:
+  nginx:
+    image: "{{ nginx_image }}"
+    container_name: "{{ nginx_container_name }}"
+    restart: always
+    ports:
+      - "{{ nginx_host_port }}:{{ nginx_container_port }}"
+    volumes:
+      - "./index.html:/usr/share/nginx/html/index.html:ro"

@@ -1,0 +1,27 @@
+---
+- name: enable php module
+  ansible.builtin.command: dnf module enable {{php_module}} -y
+
+- name: install php-packages
+  ansible.builtin.dnf:
+    name: "{{ php_fpm_packages }}"
+    state: present
+  notify:
+    - restart php-fpm
+
+- name: Configure PHP-FPM pools
+  ansible.builtin.template:
+    src: pool.conf.j2
+    dest: '/etc/php-fpm.d/{{ item.name }}.conf'
+    owner: root
+    group: root
+    mode: '0644'
+  loop: '{{ php_fpm_pools }}'
+  notify:
+  - restart php-fpm
+
+- name: Ensure PHP-FPM service is running and enabled
+  ansible.builtin.systemd:
+    name: php-fpm
+    state: started
+    enabled: true

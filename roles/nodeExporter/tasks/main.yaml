@@ -1,0 +1,4 @@
+- name: Include RedHat tasks
+  ansible.builtin.include_tasks:
+    file: RedHat.yaml
+  when: ansible_os_family == 'RedHat'

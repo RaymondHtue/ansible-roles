@@ -1,0 +1,20 @@
+- name: Install php-fpm & modules
+  ansible.builtin.apt:
+    name: "{{ php_packages }}" 
+    state: present
+    update_cache: yes
+
+- name: Start & enable php-fpm service
+  ansible.builtin.systemd:
+    name: "php{{ php_ver }}-fpm"
+    state: started
+    enabled: true
+
+- name: Create php-fpm pool for each virtual host
+  ansible.builtin.template:
+    src: fpm-pool.conf.j2
+    dest: "/etc/php/{{ php_ver }}/fpm/pool.d/{{ item.php_fpm_pool_name }}.conf"
+  notify: restart php-fpm
+  loop: "{{ vhosts }}"
+  when: item.app == "php"
+

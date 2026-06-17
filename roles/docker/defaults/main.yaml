@@ -1,0 +1,35 @@
+docker_prerequisite_packages:
+  - ca-certificates
+  - curl
+  - gnupg
+
+docker_unofficial_packages:
+  - docker-client
+  - docker-client-latest
+  - docker-common
+  - docker-latest
+  - docker-latest-logrotate
+  - docker-logrotate
+  - docker-engine
+  - podman
+  - runc
+
+docker_daemon_config:
+  log-driver: "json-file"
+  log-opts:
+    max-size: "10m"
+    max-file: "3"
+
+docker_install_packages:
+  - docker-ce 
+  - docker-ce-cli 
+  - containerd.io 
+  - docker-buildx-plugin 
+  - docker-compose-plugin
+
+docker_users:
+
+docker_rpm_gpg_key: https://download.docker.com/linux/rhel/gpg
+docker_repo_base_url: https://download.docker.com/linux/rhel/{{ ansible_distribution_major_version }}/{{ ansible_machine }}/stable/
+
+docker_ubuntu_gpg_key: https://download.docker.com/linux/ubuntu/gpg

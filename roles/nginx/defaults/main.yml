@@ -1,0 +1,11 @@
+---
+nginx_base_dir: /app
+nginx_dir_name: nginx-web01
+nginx_owner: ansible
+nginx_group: ansible
+nginx_container_name: custom_nginx
+nginx_image: nginx:1.30.0-alpine
+nginx_host_port: 8080
+nginx_container_port: 80
+nginx_page_title: "Welcome to Custom NGINX"
+nginx_page_content: "This NGINX container is managed by Ansible!"

@@ -1,0 +1,29 @@
+- name: Include nginx-Debian tasks
+  ansible.builtin.include_tasks:
+    file: nginx-Debian.yaml
+  when: ansible_os_family == 'Debian'
+
+- name: Include php-Debian tasks
+  ansible.builtin.include_tasks:
+    file: php-Debian.yaml
+  when: ansible_os_family == 'Debian'
+
+- name: Include vhosts-Debian tasks
+  ansible.builtin.include_tasks:
+    file: vhosts-Debian.yaml
+  when: ansible_os_family == 'Debian'
+
+- name: Include Nginx Redhat
+  ansible.builtin.include_tasks:
+    file: nginx-RedHat.yaml
+  when: ansible_os_family == 'RedHat'
+
+- name: Include php RedHat
+  ansible.builtin.include_tasks:
+    file: php-RedHat.yaml
+  when: ansible_os_family == 'RedHat'
+
+- name: Include vhosts Redhat
+  ansible.builtin.include_tasks:
+    file: vhosts-RedHat.yaml
+  when: ansible_os_family == 'RedHat'

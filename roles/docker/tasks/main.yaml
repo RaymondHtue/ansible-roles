@@ -1,0 +1,13 @@
+- name: Include RedHat tasks
+  ansible.builtin.include_tasks:
+    file: RedHat.yaml
+  when: ansible_os_family == 'RedHat'
+
+- name: Include Dibian tasks
+  ansible.builtin.include_tasks:
+    file: Debian.yaml
+  when: ansible_os_family == 'Debian'
+
+- name: Include task list in play
+  ansible.builtin.include_tasks:
+    file: docker-users.yaml  

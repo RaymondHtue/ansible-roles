@@ -1,0 +1,19 @@
+- name: Installing LEMP
+  hosts: <example>
+  remote_user: ansible 
+  become: true
+  gather_facts: true
+  gather_subset:
+    - "!all"
+    - min     # Collect essential facts including OS information
+    - distribution 
+  ### vhost will be create differtntly based on "Repository" variable is defined or not.
+  ### if project is not in Git, do not define "Repository" variable. If not will find git url and clone it. Task will fail.
+
+
+  ### fpm_pool will be create based on app name, if app=php fpm pool will be create.
+  roles:
+    - role: common
+    - role: nginx-fpm 
+      tags: nginx 
+    - role: composer

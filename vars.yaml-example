@@ -1,0 +1,33 @@
+# docker & common roles
+docker_users:
+  - ansible
+  # users: -> Defined when need to add <-
+packages:
+ - epel-release
+ - acl
+ - vim
+ - git
+ - bash-completion
+ - tar
+
+# nginx-fpm role
+
+  ### fpm_pool will be create based on app name, if app=php fpm pool will be create.
+  vars:
+    vhosts:
+    - server_name: "hello.example.com"
+      document_root: "/var/www/vhosts/hello.example.com/public"
+      php_fpm_pool_name: "hello-example"
+      certbot: false # true will run certbot
+      app: "php"
+      repository: "https://gitlab.com/<your-repo>.git"
+      git_desc: "/var/www/vhosts/hello.example.com"
+      branch_name: main
+    - server_name: "world.example.com"
+      document_root: "/var/www/vhosts/world.example.com/build"
+      php_fpm_pool_name: null
+      certbot: false
+      app: "frontend"
+      repository: "https://gitlab.com/<your-repo>.git
+      git_desc: "/var/www/vhosts/world.example.com"
+      branch_name: prod

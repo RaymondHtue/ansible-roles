@@ -1,0 +1,13 @@
+---
+
+- name: Install Nginx 
+  ansible.builtin.apt:
+    update_cache: yes
+    name: nginx 
+    state: present 
+
+- name: Start & enable  nginx service
+  ansible.builtin.systemd:
+      state: started 
+      enabled: true
+      name: nginx  

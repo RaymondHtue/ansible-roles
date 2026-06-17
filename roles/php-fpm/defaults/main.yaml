@@ -1,0 +1,30 @@
+php_fpm_packages:
+  - "php-cli"
+  - "php-fpm"
+  - "php-common"
+  - "php-mysqlnd"
+  - "php-opcache"
+  - "php-gd"
+
+php_module: php:8.3
+
+php_fpm_version: '8.3'
+php_fpm_socket_dir: '/var/run/php-fpm'
+php_fpm_user: 'nginx'
+php_fpm_group: 'nginx'
+
+fpm_pool_name: www
+
+# Default pool variables for a basic pool
+php_fpm_pools:
+  - name: '{{ fpm_pool_name }}'
+    user: '{{ php_fpm_user }}'
+    group: '{{ php_fpm_group }}'
+    listen: '{{ php_fpm_socket_dir }}/{{ fpm_pool_name }}.sock'
+    listen_owner: '{{ php_fpm_user }}'
+    listen_group: '{{ php_fpm_group }}'
+    pm: 'dynamic'
+    pm_max_children: 50
+    pm_start_servers: 5
+    pm_min_spare_servers: 5
+    pm_max_spare_servers: 20

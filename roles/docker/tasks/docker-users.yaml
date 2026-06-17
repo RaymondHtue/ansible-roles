@@ -1,0 +1,11 @@
+- name: Ensure docker users are added to the docker group.
+  user:
+    name: "{{ item }}"
+    groups: docker
+    append: true
+  loop: "{{ docker_users }}"
+  when: docker_users is defined
+
+
+- name: Reset ssh connection to apply user changes.
+  meta: reset_connection

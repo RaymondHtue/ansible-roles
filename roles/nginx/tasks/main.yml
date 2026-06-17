@@ -1,0 +1,54 @@
+---
+- name: Create base directory
+  ansible.builtin.file:
+    path: "{{ nginx_base_dir }}"
+    state: directory
+    owner: "{{ nginx_owner }}"
+    group: "{{ nginx_group }}"
+    mode: '0755'
+  become: true
+
+- name: Create app directory
+  ansible.builtin.file:
+    path: "{{ nginx_base_dir }}/{{ nginx_dir_name }}"
+    state: directory
+    owner: "{{ nginx_owner }}"
+    group: "{{ nginx_group }}"
+    mode: '0755'
+  become: true
+
+- name: Create custom HTML page from template
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: "{{ nginx_base_dir }}/{{ nginx_dir_name }}/index.html"
+    owner: "{{ nginx_owner }}"
+    group: "{{ nginx_group }}"
+    mode: '0644'
+  become: true
+
+- name: Create docker-compose.yaml from template
+  ansible.builtin.template:
+    src: docker-compose.yaml.j2
+    dest: "{{ nginx_base_dir }}/{{ nginx_dir_name }}/docker-compose.yaml"
+    owner: "{{ nginx_owner }}"
+    group: "{{ nginx_group }}"
+    mode: '0644'
+  become: true
+
+- name: Deploy docker compose
+  ansible.builtin.command: docker compose up -d
+  args:
+    chdir: "{{ nginx_base_dir }}/{{ nginx_dir_name }}"
+  become: true 
+
+- name: Test nginx
+  ansible.builtin.uri:
+    url: "http://localhost:{{ nginx_host_port }}"
+    method: GET
+    status_code: 200
+  register: nginx_test_output
+  until: nginx_test_output.status == 200
+
+- name: Display nginx test output
+  ansible.builtin.debug:
+    var: nginx_test_output

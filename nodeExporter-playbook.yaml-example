@@ -1,0 +1,7 @@
+- name: Installing nodeExporter 
+  hosts: <example> 
+  remote_user: ansible 
+  become: true
+  roles:
+    - role: nodeExporter 
+      tags: nodeExporter

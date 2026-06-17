@@ -1,0 +1,45 @@
+server {
+    listen 80;
+    server_name {{ item.server_name }};
+    root {{ item.document_root }}; 
+    client_max_body_size 20M;
+    index index.php;
+    access_log /var/log/nginx/{{ item.server_name.split('.')[-2] }}_access.log;
+    error_log /var/log/nginx/{{ item.server_name.split('.')[-2] }}_error.log;
+
+    gzip on;
+    gzip_static on;
+    gzip_vary on;
+    gzip_disable "msie6";
+    gzip_types text/css text/x-component application/x-javascript application/javascript text/javascript text/x-js text/richtext image/svg+xml text/plain text/xsd text/xsl text/xml image/x-icon image/jpg image/jpeg;
+    gzip_http_version 1.1;
+    gzip_comp_level 6;
+    gzip_proxied any;
+
+    location ~ ^/\. { return 404; }
+
+    add_header X-Frame-Options "SAMEORIGIN";
+    add_header X-Content-Type-Options "nosniff";
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_pass unix:/run/php-fpm/{{ item.php_fpm_pool_name }}.sock;  
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        fastcgi_index index.php;
+        fastcgi_buffers 16 16k;
+        fastcgi_buffer_size 32k;
+    }
+
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "same-origin";
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Set-Cookie "cookie_name=cookie_value; Path=/; Secure; HttpOnly";
+
+}

@@ -1,0 +1,66 @@
+---
+- name: Unarchive a file that needs to be downloaded (added in 2.0)
+  ansible.builtin.unarchive:
+    src: https://github.com/prometheus/node_exporter/releases/download/v0.18.1/node_exporter-0.18.1.linux-amd64.tar.gz 
+    dest: /tmp/
+    remote_src: true 
+    creates: /tmp/node_exporter-0.18.1.linux-amd64
+
+- name: copy nodeExport binary file to bin dir
+  ansible.builtin.copy:
+    src: /tmp/node_exporter-0.18.1.linux-amd64/node_exporter
+    dest: /usr/bin/node_exporter
+    owner: root 
+    group: root 
+    mode: '755'
+    remote_src: true
+
+
+- name: Add nodeExporter user
+  ansible.builtin.user:
+    name: node_exporter
+    comment: node_exporter 
+    create_home: false
+    shell: /sbin/nologin
+
+- name: Create nodeExpert systemd service
+  ansible.builtin.template:
+    src: node_exporter.service.j2
+    dest: /etc/systemd/system/node_exporter.service
+    owner: node_exporter 
+    group: node_exporter 
+    mode: '0644'
+#  notify: restart nodeExporter
+
+- name: Enable & start nodeExporter service
+  ansible.builtin.systemd:
+    name: node_exporter
+    state: started
+    enabled: true
+
+- name: Check if firewalld service is active
+  ansible.builtin.command: systemctl is-active firewalld.service
+  register: is_firewalld_active
+  ignore_errors: true
+
+
+- name: Allow nodeExporter port in firewalld
+  ansible.posix.firewalld:
+    port: 9100/tcp
+    immediate: true
+    zone: public
+    permanent: true
+    state: enabled
+  when: is_firewalld_active.stdout == "active"
+
+- name: Check nodeExporter metric 
+  ansible.builtin.command: curl -I localhost:9100/metrics
+  register: service_status 
+  failed_when: service_status.rc != 0
+  changed_when: False
+
+- name: Output service_status
+  debug:
+    msg: "{{service_status}}"
+
+

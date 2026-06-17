@@ -1,0 +1,131 @@
+---
+
+- name: Create document root 
+  file: 
+    path: "{{ item.document_root }}"
+    state: directory
+    owner: www-data 
+    group: www-data 
+    mode: '0755'
+  loop: "{{ vhosts }}"
+  when: item.repository is not defined 
+
+- name: Clone a Git repository
+  ansible.builtin.git:
+    repo: "{{ item.repository }}"
+    dest: "{{ item.git_desc }}" 
+    single_branch: yes
+    version: "{{ item.branch_name }}" 
+    clone: yes
+    update: no 
+  loop: "{{ vhosts }}"
+  when: item.repository is defined
+
+#- name: Check if nginx default site exists
+#  ansible.builtin.stat:
+#    path: /etc/nginx/sites-enabled/default 
+#  register: nginx_default 
+#
+#- name: Disable the default virtual host
+#  command: unlink /etc/nginx/sites-enabled/default 
+#  when: nginx_default.stat.exists 
+
+- name: Create nginx virtual host for php 
+  ansible.builtin.template:
+    src: vhosts-php.conf.j2
+    dest: "/etc/nginx/sites-available/{{ item.server_name }}.conf"
+  loop: "{{ vhosts }}"
+  when: item.app == "php"
+
+- name: Create nginx virtual host for frontend
+  ansible.builtin.template:
+    src: vhosts-frontend.conf.j2
+    dest: "/etc/nginx/sites-available/{{ item.server_name }}.conf"
+  loop: "{{ vhosts }}"
+  when: item.app == "frontend"
+
+- name:  Set standard permission for frontend 
+  ansible.builtin.file:
+    path: "{{ item.git_desc }}" 
+    state: directory
+    mode: '0755' # Octal representation for rwxr-xr-x
+    recurse: yes
+    owner: "{{ web_developer }}" 
+    group: "{{ web_user }}" 
+  loop: "{{ vhosts }}"
+  when: item.app == "frontend"
+
+- name:  Set standard permission for web_dev 
+  ansible.builtin.file:
+    path: "{{ item.git_desc }}"
+    state: directory
+    mode: '0755' # Octal representation for rwxr-xr-x
+    recurse: yes
+    owner: "{{ web_developer }}" 
+    group: "{{ web_developer }}" 
+  loop: "{{ vhosts }}"
+  when: item.app == "php"
+
+- name: Set special permission for web user read and write access stoarge 
+  ansible.posix.acl:
+    path: "{{ item.git_desc }}/storage/"
+    entity: "{{ web_user }}" 
+    etype: user
+    permissions: rw
+    default: true
+    recursive: true
+    state: present
+  loop: "{{ vhosts }}"
+  when: item.app == "php"
+
+- name: Set special permission for web user read and write bootstrap
+  ansible.posix.acl:
+    path: "{{ item.git_desc }}/bootstrap/"
+    entity: "{{ web_user }}" 
+    etype: user
+    permissions: rw
+    default: true
+    recursive: true
+    state: present
+  loop: "{{ vhosts }}"
+  when: item.app == "php"
+
+- name: Check if nginx sites already enable 
+  ansible.builtin.stat:
+    path: /etc/nginx/sites-enabled/{{ item.server_name }}.conf
+  register: nginx_sites_enabled
+  loop: "{{ vhosts }}"
+  loop_control:
+    index_var: vhost_index
+
+- name: enable virtual host for php
+  ansible.builtin.file:
+      src: "/etc/nginx/sites-available/{{ item.server_name }}.conf"
+      dest: "/etc/nginx/sites-enabled/{{ item.server_name }}.conf"
+      state: link
+  loop: "{{ vhosts }}"
+  loop_control:
+    index_var: vhost_index
+  when: not nginx_sites_enabled.results[vhost_index].stat.exists
+  
+- name: Test nginx config
+  block:
+  - name: validate nginx config
+    ansible.builtin.command: nginx -t
+    register: validate_nginx_config 
+
+  - name: Display Nginx configuration status 
+    debug:
+      msg: "Nginx -t command message: {{ validate_nginx_config.stderr_lines }}"
+    when: validate_nginx_config.rc == 0 
+
+  - name: Restart Nginx if configuration is valid
+    ansible.builtin.systemd:
+      name: nginx 
+      state: restarted
+    when: validate_nginx_config.rc == 0 
+  rescue:
+  - name: Display Nginx configuration errors
+    debug:
+      msg: "Nginx -t command errors: {{ validate_nginx_config.stderr }}"
+    when: validate_nginx_config.rc != 0 

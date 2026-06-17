@@ -1,0 +1,61 @@
+--- 
+
+# Official Nginx repo settings for RHEL/Alma
+nginx_repo_url: "http://nginx.org/packages/centos/{{ ansible_distribution_major_version }}/$basearch/"
+nginx_gpg_key: "https://nginx.org/keys/nginx_signing.key"
+
+php_ver: 8.3
+
+web_user: www-data
+web_user_redhat: nginx
+web_developer: vodev
+
+vhosts:
+  - server_name: "example.com"
+    document_root: "/var/www/vhosts/example.com/public"
+    php_fpm_pool_name: "example_com"
+    certbot: false 
+    app: "php"
+
+  - server_name: "anothersite.org"
+    document_root: "/var/www/vhosts/anothersite.org/public"
+    php_fpm_pool_name: "anothersite_org"
+    certbot: false
+    repository: null
+    app: "php"
+    
+  - server_name: "frontend.site"
+    document_root: "/var/www/vhosts/frontend.site/build"
+    php_fpm_pool_name: "anothersite_org"
+    certbot: false
+    app: "frontend"
+
+  - server_name: "git.site"
+    document_root: "/var/www/vhosts/git.site/build"
+    php_fpm_pool_name: null 
+    certbot: false
+    app: "frontend"
+    repository: "https://deploy:-h5fWsuBcpvzeSn-wBaB@gitlab.visibleone.io/vorp/asdayone-oneotoo.git"
+    git_desc: "/var/www/vhosts/git.site"
+    branch_name: main
+
+php_packages_debian:
+  - "php{{ php_ver }}-fpm"
+  - "php{{ php_ver }}-zip"
+  - "php{{ php_ver }}-xml"
+  - "php{{ php_ver }}-tokenizer"
+  - "php{{ php_ver }}-mysql"
+  - "php{{ php_ver }}-curl"
+  - "php{{ php_ver }}-pgsql"
+  - "php{{ php_ver }}-redis"
+  - "php{{ php_ver }}-soap"
+
+php_packages_redhat:
+  - "php-fpm"
+  - "php-zip"
+  - "php-xml"
+  - "php-tokenizer"
+  - "php-mysqlnd"
+  - "php-curl"
+  - "php-redis"
+  - "php-soap"
