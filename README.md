@@ -55,7 +55,9 @@ The main entry point for deploying these services is the `docker-playbook.yaml` 
 - `common`: Basic system configurations, updating package cache and upgrading the system, creating the additional sysadmin user and group (Tag: `common`)
 - `docker`: Installs and configures Docker and Docker Compose (Tag: `docker`)
 - `nodeExporter`: Deploys the Prometheus Node Exporter for system metrics (Tag: `nodeExporter`)
-- and others roles will be added in future 
+- `nginx`: Deploy nginx docker container using docker-compose 
+- `nginx-fpm`: LEMP stack + Static site deployments for Debian & RPM base OSes.
+- `php-fpm`: Install php and configure php-fpm pools
 
 ### Execution Commands
 
